@@ -7,11 +7,40 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Repository for twecs Lambda deployment packages
 
 
+Parameters:
+
+   ExpirationInDays:
+      Description: How many days deployment packages should be kept in the bucket.
+      Type: Number
+      Default: 0
+
+
+Conditions:
+
+   AutoCleanUpEnabled:
+      Fn::Not:
+         -
+            Fn::Equals:
+               -
+                  Ref: ExpirationInDays
+               - 0
+
+
 Resources:
 
    Bucket:
       Type: AWS::S3::Bucket
       Properties:
+         LifecycleConfiguration:
+            Rules:
+               -
+                  Status:
+                     Fn::If:
+                        - AutoCleanUpEnabled
+                        - Enabled
+                        - Disabled
+                  ExpirationInDays:
+                     Ref: DeleteAfterDays
          Tags:
             -
                Key: 'twecs:purpose'
