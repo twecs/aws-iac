@@ -1,0 +1,116 @@
+---
+
+
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Description: twecs Lambda function to set up Wise currency exchanges
+
+
+Parameters:
+
+   IamPath:
+      Description: Path for IAM resources.
+      Type: String
+
+   Layers:
+      Description: ARNs of Lambda layers to add to the function's execution environment.
+      Type: CommaDelimitedList
+
+   Policies:
+      Description: ARNs of IAM managed policies to attach to the function's role.
+      Type: CommaDelimitedList
+
+   PythonVersion:
+      Description: Python version to use.
+      Type: String
+
+   WiseApiBaseUrl:
+      Description: Base URL of the Wise REST API.
+      Type: String
+
+   WiseApiKeySecretArn:
+      Description: ARN of the Secrets Manager secret containing the Wise API key to use.
+      Type: String
+
+
+Resources:
+
+   Function:
+      Type: AWS::Lambda::Function
+      Properties:
+         Code:
+            ZipFile: |
+               from twecs.drivers.aws.lambda_.handlers.wise import entry_point
+         Description: twecs Wise exchange set-up
+         Environment:
+            Variables:
+               WISE_API_BASE_URL:
+                  Ref: WiseApiBaseUrl
+               WISE_API_KEY_SECRET_ARN:
+                  Ref: WiseApiKeySecretArn
+         Handler: index.entry_point
+         Layers:
+            Ref: Layers
+         MemorySize: 128
+         Role:
+            Fn::GetAtt:
+               - FunctionRole
+               - Arn
+         Runtime:
+            Fn::Sub: python${PythonVersion}
+         Tags:
+            -
+               Key: 'twecs:purpose'
+               Value: runtime
+         Timeout: 15
+
+   FunctionRole:
+      Type: AWS::IAM::Role
+      Properties:
+         Path:
+            Ref: IamPath
+         AssumeRolePolicyDocument:
+            Version: 2012-10-17
+            Statement:
+               -
+                  Principal:
+                     Service:
+                        - lambda.amazonaws.com
+                  Action:
+                     - sts:AssumeRole
+                  Effect: Allow
+         ManagedPolicyArns:
+            Ref: Policies
+         Policies:
+            -
+               PolicyName: secrets
+               PolicyDocument:
+                  Version: 2012-10-17
+                  Statement:
+                     -
+                        Action:
+                           - secretsmanager:GetSecretValue
+                        Resource:
+                           -
+                              Ref: WiseApiKeySecretArn
+                        Effect: Allow
+         Tags:
+            -
+               Key: 'twecs:purpose'
+               Value: security
+
+
+Outputs:
+
+   FunctionArn:
+      Description: ARN of the Lambda function.
+      Value:
+         Fn::GetAtt:
+            - Function
+            - Arn
+
+   FunctionName:
+      Description: Name of the Lambda function.
+      Value:
+         Ref: Function
