@@ -17,6 +17,10 @@ Parameters:
       Description: ARNs of Lambda layers to add to the function's execution environment.
       Type: CommaDelimitedList
 
+   NotificationTopicArn:
+      Description: ARN of the SNS topic to which notification modules are subscribed.
+      Type: String
+
    Policies:
       Description: ARNs of IAM managed policies to attach to the function's role.
       Type: CommaDelimitedList
@@ -45,6 +49,8 @@ Resources:
          Description: twecs Wise exchange set-up
          Environment:
             Variables:
+               NOTIFICATION_TOPIC_ARN:
+                  Ref: NotificationTopicArn
                WISE_API_BASE_URL:
                   Ref: WiseApiBaseUrl
                WISE_API_KEY_SECRET_ARN:
@@ -94,6 +100,18 @@ Resources:
                         Resource:
                            -
                               Ref: WiseApiKeySecretArn
+                        Effect: Allow
+            -
+               PolicyName: notification
+               PolicyDocument:
+                  Version: 2012-10-17
+                  Statement:
+                     -
+                        Action:
+                           - sns:Publish
+                        Resource:
+                           -
+                              Ref: NotificationTopicArn
                         Effect: Allow
          Tags:
             -

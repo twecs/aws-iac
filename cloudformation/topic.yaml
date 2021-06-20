@@ -1,0 +1,33 @@
+---
+
+
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Description: twecs SNS topic
+
+
+Resources:
+
+   Topic:
+      Type: AWS::SNS::Topic
+      Properties:
+         Tags:
+            -
+               Key: 'twecs:purpose'
+               Value: notification
+
+
+Outputs:
+
+   TopicArn:
+      Description: ARN of the SNS topic.
+      Value:
+         Ref: Topic
+
+   TopicName:
+      Description: Name of the SNS topic.
+      Value:
+         Fn::GetAtt:
+            - Topic
+            - TopicName
