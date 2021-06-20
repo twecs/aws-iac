@@ -9,7 +9,7 @@ Description: Repository for twecs Lambda deployment packages
 
 Parameters:
 
-   ExpirationInDays:
+   DeleteAfterDays:
       Description: How many days deployment packages should be kept in the bucket.
       Type: Number
       Default: 0
@@ -22,7 +22,7 @@ Conditions:
          -
             Fn::Equals:
                -
-                  Ref: ExpirationInDays
+                  Ref: DeleteAfterDays
                - 0
 
 
