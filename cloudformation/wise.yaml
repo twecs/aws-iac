@@ -41,7 +41,7 @@ Resources:
       Properties:
          Code:
             ZipFile: |
-               from twecs.drivers.aws.lambda_.handlers.wise import entry_point
+               from twecs.aws.lambda_.handlers.wise import entry_point
          Description: twecs Wise exchange set-up
          Environment:
             Variables:
