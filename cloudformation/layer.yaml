@@ -1,0 +1,64 @@
+---
+
+
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Description: twecs Lambda layer
+
+
+Parameters:
+
+   RepositoryBucket:
+      Description: Name of the S3 bucket that contains the deployment package object.
+      Type: String
+
+   GitCommitId:
+      Description: ID of the git commit to deploy.
+      Type: String
+
+   PythonPackageName:
+      Description: Name of the Python package.
+      Type: String
+
+   PythonVersions:
+      Description: Python versions supported by the deployment package.
+      Type: CommaDelimitedList
+
+
+Resources:
+
+   LayerVersion:
+      Type: AWS::Lambda::LayerVersion
+      Properties:
+         CompatibleRuntimes:
+            Ref: PythonVersions
+         Content:
+            S3Bucket:
+               Ref: RepositoryBucket
+            S3Key:
+               Fn::Sub: ${PythonPackageName}/${GitCommitId}.zip
+         Description:
+            Fn::Sub: >-
+               Python package ${PythonPackageName} git commit ID ${GitCommitId}
+         LayerName:
+            Fn::Join:
+               - '-'
+               -
+                  Fn::Split:
+                     - .
+                     -
+                        Ref: PythonPackageName
+         # FIXME: tag when supported
+         #Tags:
+         #   -
+         #      Key: 'twecs:purpose'
+         #      Value: runtime
+
+
+Outputs:
+
+   LatestVersionArn:
+      Description: ARN of the Lambda layer's latest version.
+      Value:
+         Ref: LayerVersion
