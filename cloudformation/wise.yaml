@@ -29,9 +29,10 @@ Parameters:
       Description: Base URL of the Wise REST API.
       Type: String
 
-   WiseApiKeySecretArn:
-      Description: ARN of the Secrets Manager secret containing the Wise API key to use.
+   WiseApiKey:
+      Description: Key to access the Wise API.
       Type: String
+      NoEcho: true
 
 
 Resources:
@@ -47,8 +48,8 @@ Resources:
             Variables:
                WISE_API_BASE_URL:
                   Ref: WiseApiBaseUrl
-               WISE_API_KEY_SECRET_ARN:
-                  Ref: WiseApiKeySecretArn
+               WISE_API_KEY:
+                  Ref: WiseApiKey
          Handler: index.entry_point
          Layers:
             Ref: Layers
@@ -82,19 +83,6 @@ Resources:
                   Effect: Allow
          ManagedPolicyArns:
             Ref: Policies
-         Policies:
-            -
-               PolicyName: secrets
-               PolicyDocument:
-                  Version: 2012-10-17
-                  Statement:
-                     -
-                        Action:
-                           - secretsmanager:GetSecretValue
-                        Resource:
-                           -
-                              Ref: WiseApiKeySecretArn
-                        Effect: Allow
          Tags:
             -
                Key: 'twecs:purpose'
